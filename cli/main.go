@@ -41,10 +41,16 @@ func main() {
 				Name:  "slack",
 				Usage: "Run AI Agent as slack bot",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					err := internal.StartSlackBot()
+					agent, err := internal.NewAgent("You are a helpful assistance. Reply concisely.")
 					if err != nil {
-						log.Fatalln("failed to start slack", err)
+						return fmt.Errorf("failed to create ai agent - %w", err)
 					}
+
+					slackBot := internal.NewSlackBot(agent)
+					if slackBot.Run() != nil {
+						return fmt.Errorf("failed to run slack agent - %w", err)
+					}
+
 					return nil
 				},
 			},
