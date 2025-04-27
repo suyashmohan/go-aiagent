@@ -4,9 +4,9 @@ This repository demonstrates how to build AI agents using Go, countering the com
 ### Overview
 This project creates a simple AI agent in Go that:
 
-Connects to OpenAI's API for language model interaction
-Integrates with Slack for messaging capabilities
-Provides a convenient CLI interface
+- Connects to OpenAI's API for language model interaction
+- Integrates with Slack for messaging capabilities
+- Provides a convenient CLI interface
 
 ### Technologies Used
 
@@ -27,8 +27,8 @@ go mod download
 Create a .env file in the project root with your API credentials:
 ```
 OPENAI_API_KEY=
-API_BASE_URL=
-OPENAI_MODEL_NAME=
+API_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL_NAME=gpt-4.1-mini
 SLACK_BOT_TOKEN=
 SLACK_APP_TOKEN=
 ```
@@ -38,10 +38,10 @@ Basic Example
 
 ```bash
 # Run the agent with slack integration
-go run ./cli/main.go slack
+go run ./cli/agent.go slack
 
 # Test the agent on cli without slack
-go run ./cli/main.go "What is 2+2?"
+go run ./cli/agent.go "What is 2+2?"
 ```
 
 ### Why Go for AI Agents?
