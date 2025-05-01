@@ -13,11 +13,16 @@ import (
 
 func main() {
 	godotenv.Load()
+	fileBytes, err := os.ReadFile("system.md")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	systemPrompt := string(fileBytes)
 	cmd := &cli.Command{
 		Name:  "agent",
 		Usage: "Run AI agent with a query",
 		Action: func(ctx context.Context, c *cli.Command) error {
-			agent, err := internal.NewAgent("You are a helpful assistance. Reply concisely.")
+			agent, err := internal.NewAgent(systemPrompt)
 			if err != nil {
 				return fmt.Errorf("failed to create ai agent - %w", err)
 			}
@@ -41,7 +46,7 @@ func main() {
 				Name:  "slack",
 				Usage: "Run AI Agent as slack bot",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					agent, err := internal.NewAgent("You are a helpful assistance. Reply concisely.")
+					agent, err := internal.NewAgent(systemPrompt)
 					if err != nil {
 						return fmt.Errorf("failed to create ai agent - %w", err)
 					}
