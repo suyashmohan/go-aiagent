@@ -1,4 +1,4 @@
-module github.com/suyashmohan/myaiagent
+module github.com/suyashmohan/go-aiagent
 
 go 1.23.5
 

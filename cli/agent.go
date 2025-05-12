@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/suyashmohan/myaiagent/internal"
+	"github.com/suyashmohan/go-aiagent/internal"
 	"github.com/urfave/cli/v3"
 )
 

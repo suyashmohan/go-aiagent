@@ -18,8 +18,8 @@ This project creates a simple AI agent in Go that:
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/suyashmohan/myaiagent
-cd myaiagent
+git clone https://github.com/suyashmohan/go-aiagent
+cd go-aiagent
 go mod download
 ```
 
