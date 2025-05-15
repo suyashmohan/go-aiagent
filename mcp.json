@@ -1,0 +1,23 @@
+{
+    "mcpServers": {
+      "duckduckgo": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "mcp/duckduckgo"
+        ]
+      },
+      "wikipedia-mcp": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "mcp/wikipedia-mcp"
+        ]
+      }
+    }
+  }
+  

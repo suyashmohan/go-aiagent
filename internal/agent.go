@@ -20,7 +20,7 @@ type Agent struct {
 
 type AgentTool struct {
 	Description string
-	Parameters  map[string]string
+	Parameters  map[string]any
 	Required    []string
 	Fn          func(map[string]interface{}) string
 }
@@ -56,14 +56,6 @@ func (a *Agent) Run(context context.Context, prompt string) (string, error) {
 	// Prepare Tools for function calling
 	toolFuncs := []openai.ChatCompletionToolParam{}
 	for name, tool := range a.Tools {
-		properties := make(map[string]interface{})
-
-		for prop, propType := range tool.Parameters {
-			properties[prop] = map[string]string{
-				"type": propType,
-			}
-		}
-
 		// Convert our style of Function definition into OpenAI style
 		toolFuncs = append(toolFuncs, openai.ChatCompletionToolParam{
 			Function: openai.FunctionDefinitionParam{
@@ -72,7 +64,7 @@ func (a *Agent) Run(context context.Context, prompt string) (string, error) {
 				Parameters: openai.FunctionParameters{
 					"type":       "object",
 					"required":   tool.Required,
-					"properties": properties,
+					"properties": tool.Parameters,
 				},
 			},
 		})

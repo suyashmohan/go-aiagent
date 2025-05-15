@@ -79,11 +79,7 @@ func (s *SlackBot) handleAppMentionEvent(evt *socketmode.Event, client *socketmo
 	}
 	log.Println("Answer:", answer)
 
-	threadId := ev.TimeStamp
-	if ev.ThreadTimeStamp != "" {
-		threadId = ev.ThreadTimeStamp
-	}
-	_, _, err := client.Client.PostMessage(ev.Channel, slack.MsgOptionText(answer, false), slack.MsgOptionTS(threadId))
+	_, _, err := client.Client.PostMessage(ev.Channel, slack.MsgOptionText(answer, false))
 	if err != nil {
 		log.Printf("failed to post message on slack - %s", err)
 	}
