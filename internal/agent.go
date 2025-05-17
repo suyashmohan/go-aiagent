@@ -50,7 +50,7 @@ func NewAgentWithTools(systemPrompt string, tools map[string]AgentTool) (*Agent,
 }
 
 func (a *Agent) Run(context context.Context, prompt string) (string, error) {
-	maxSteps := 3
+	maxSteps := 5
 	currStep := 0
 
 	// Prepare Tools for function calling

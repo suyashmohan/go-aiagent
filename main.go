@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/client"
@@ -22,12 +23,6 @@ func main() {
 	if err != nil {
 		log.Println("failed to load mcp.json - %w", err)
 	}
-	defer func() {
-		for mcpName, mcpClient := range mcpClients {
-			log.Println("Closing", mcpName)
-			mcpClient.Close()
-		}
-	}()
 
 	// Load System prompt
 	fileBytes, err := os.ReadFile("system.md")
@@ -60,6 +55,12 @@ func main() {
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatalln(err)
 	}
+
+	for mcpName, mcpClient := range mcpClients {
+		log.Println("Closing", mcpName)
+		mcpClient.Close()
+		log.Println("Closed", mcpName)
+	}
 }
 
 func getTools(mcpClients map[string]client.MCPClient) map[string]internal.AgentTool {
@@ -82,11 +83,14 @@ func getTools(mcpClients map[string]client.MCPClient) map[string]internal.AgentT
 				Parameters:  tool.InputSchema.Properties,
 				Required:    tool.InputSchema.Required,
 				Fn: func(m map[string]interface{}) string {
+					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					defer cancel()
+
 					log.Println("Inside", toolName, m)
 					callToolReq := mcp.CallToolRequest{}
 					callToolReq.Params.Name = tool.Name
 					callToolReq.Params.Arguments = m
-					callToolRes, err := mcpClient.CallTool(context.Background(), callToolReq)
+					callToolRes, err := mcpClient.CallTool(ctx, callToolReq)
 					if err != nil {
 						log.Printf("Failed to call tool: %v", err)
 					}

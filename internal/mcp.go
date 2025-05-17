@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -47,6 +48,9 @@ func LoadMCPServers(mcpConfigFilepath string) (map[string]client.MCPClient, erro
 			return nil, fmt.Errorf("failed to start transport for mcp server - %w", err)
 		}
 
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
 		initRequest := mcp.InitializeRequest{}
 		initRequest.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
 		initRequest.Params.ClientInfo = mcp.Implementation{
@@ -55,7 +59,7 @@ func LoadMCPServers(mcpConfigFilepath string) (map[string]client.MCPClient, erro
 		}
 		initRequest.Params.Capabilities = mcp.ClientCapabilities{}
 
-		_, err = stdioClient.Initialize(context.Background(), initRequest)
+		_, err = stdioClient.Initialize(ctx, initRequest)
 		if err != nil {
 			return nil, fmt.Errorf("failed to initialise mcp client - %w", err)
 		}
