@@ -69,3 +69,40 @@ func LoadMCPServers(mcpConfigFilepath string) (map[string]client.MCPClient, erro
 
 	return mcpClients, nil
 }
+
+func ListMCPTools(mcpClient client.MCPClient) (*mcp.ListToolsResult, error) {
+	toolsRequest := mcp.ListToolsRequest{}
+	return mcpClient.ListTools(context.Background(), toolsRequest)
+}
+
+func MCPToolAsLLMTool(tool mcp.Tool, mcpClient client.MCPClient) AgentTool {
+	return AgentTool{
+		Description: tool.Description,
+		Parameters:  tool.InputSchema.Properties,
+		Required:    tool.InputSchema.Required,
+		Fn: func(m map[string]interface{}) string {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			log.Println("Inside", tool.Name, m)
+			callToolReq := mcp.CallToolRequest{}
+			callToolReq.Params.Name = tool.Name
+			callToolReq.Params.Arguments = m
+			callToolRes, err := mcpClient.CallTool(ctx, callToolReq)
+			if err != nil {
+				log.Printf("Failed to call tool: %v", err)
+			}
+			// Extract text content
+			var resultText string
+			// Handle array content directly since we know it's []interface{}
+			for _, item := range (*callToolRes).Content {
+				if contentMap, ok := item.(mcp.TextContent); ok {
+					resultText += fmt.Sprintf("%v ", contentMap.Text)
+				}
+			}
+			log.Println(resultText)
+
+			return resultText
+		},
+	}
+}

@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/client"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/suyashmohan/go-aiagent/cmd"
 	"github.com/suyashmohan/go-aiagent/internal"
 	"github.com/urfave/cli/v3"
@@ -67,8 +65,7 @@ func getTools(mcpClients map[string]client.MCPClient) map[string]internal.AgentT
 	tools := map[string]internal.AgentTool{}
 
 	for mcpName, mcpClient := range mcpClients {
-		toolsRequest := mcp.ListToolsRequest{}
-		toolsResult, err := mcpClient.ListTools(context.Background(), toolsRequest)
+		toolsResult, err := internal.ListMCPTools(mcpClient)
 		if err != nil {
 			log.Printf("Failed to list tools: %v", err)
 			return nil
@@ -78,35 +75,7 @@ func getTools(mcpClients map[string]client.MCPClient) map[string]internal.AgentT
 		for i, tool := range toolsResult.Tools {
 			log.Printf("%d. %s - %s\n", i+1, tool.Name, tool.Description)
 			toolName := fmt.Sprintf("%s__%s", mcpName, tool.Name)
-			tools[toolName] = internal.AgentTool{
-				Description: tool.Description,
-				Parameters:  tool.InputSchema.Properties,
-				Required:    tool.InputSchema.Required,
-				Fn: func(m map[string]interface{}) string {
-					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-					defer cancel()
-
-					log.Println("Inside", toolName, m)
-					callToolReq := mcp.CallToolRequest{}
-					callToolReq.Params.Name = tool.Name
-					callToolReq.Params.Arguments = m
-					callToolRes, err := mcpClient.CallTool(ctx, callToolReq)
-					if err != nil {
-						log.Printf("Failed to call tool: %v", err)
-					}
-					// Extract text content
-					var resultText string
-					// Handle array content directly since we know it's []interface{}
-					for _, item := range (*callToolRes).Content {
-						if contentMap, ok := item.(mcp.TextContent); ok {
-							resultText += fmt.Sprintf("%v ", contentMap.Text)
-						}
-					}
-					log.Println(resultText)
-
-					return resultText
-				},
-			}
+			tools[toolName] = internal.MCPToolAsLLMTool(tool, mcpClient)
 		}
 
 	}
